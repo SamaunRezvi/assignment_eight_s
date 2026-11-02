@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src scripts",
+    "lint": "eslint src scripts tests",
     "test": "vitest run",
     "seed": "tsx --env-file=.env scripts/seed.ts"
   },
@@ -45,6 +45,7 @@
     "@types/node": "^26.6.6",
     "@types/pdfkit": "^0.17.7",
     "eslint": "^10.14.0",
+    "mongodb-memory-server": "^11.3.0",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
