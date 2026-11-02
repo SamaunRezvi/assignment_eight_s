@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { bookingsRouter } from "./modules/bookings/bookings.routes.js";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
+import { newsletterRouter } from "./modules/newsletter/newsletter.routes.js";
 import { reviewsRouter } from "./modules/reviews/reviews.routes.js";
 import { studiosRouter } from "./modules/studios/studios.routes.js";
 import { uploadsRouter } from "./modules/uploads/uploads.routes.js";
@@ -17,4 +18,5 @@ apiRouter.use("/bookings", bookingsRouter);
 apiRouter.use("/wishlist", wishlistRouter);
 apiRouter.use("/dashboard", dashboardRouter);
 apiRouter.use("/uploads", uploadsRouter);
+apiRouter.use("/newsletter", newsletterRouter);
 apiRouter.use(reviewsRouter);

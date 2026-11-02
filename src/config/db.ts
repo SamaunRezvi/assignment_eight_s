@@ -1,6 +1,6 @@
 import { MongoClient, type Collection, type Db } from "mongodb";
 import { env } from "./env.js";
-import type { BookingDoc, ReviewDoc, StudioDoc, WishlistDoc } from "../types/models.js";
+import type { BookingDoc, ReviewDoc, StudioDoc, SubscriberDoc, WishlistDoc } from "../types/models.js";
 
 let client: MongoClient | undefined;
 let db: Db | undefined;
@@ -35,6 +35,7 @@ export const collections = {
   bookings: (): Collection<BookingDoc> => getDb().collection<BookingDoc>("bookings"),
   reviews: (): Collection<ReviewDoc> => getDb().collection<ReviewDoc>("reviews"),
   wishlists: (): Collection<WishlistDoc> => getDb().collection<WishlistDoc>("wishlists"),
+  subscribers: (): Collection<SubscriberDoc> => getDb().collection<SubscriberDoc>("subscribers"),
 };
 
 async function ensureIndexes(database: Db): Promise<void> {
@@ -54,6 +55,7 @@ async function ensureIndexes(database: Db): Promise<void> {
       { key: { studioId: 1, createdAt: -1 } },
       { key: { studioId: 1, userId: 1 }, unique: true },
     ]),
+    database.collection("subscribers").createIndexes([{ key: { email: 1 }, unique: true }]),
     database.collection("wishlists").createIndexes([
       { key: { userId: 1, studioId: 1 }, unique: true },
       { key: { userId: 1, createdAt: -1 } },

@@ -81,6 +81,12 @@ export interface WishlistDoc {
   createdAt: Date;
 }
 
+export interface SubscriberDoc {
+  _id: ObjectId;
+  email: string;
+  createdAt: Date;
+}
+
 export interface AuthUser {
   id: string;
   email: string;
