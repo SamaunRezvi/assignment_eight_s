@@ -1,0 +1,109 @@
+<svg width="1120" height="420" viewBox="0 0 1120 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title description">
+  <title id="title">StudioSpace API - secure booking engine</title>
+  <desc id="description">An animated isometric stack of server units with blinking status lights and floating API response cards in StudioSpace's amber and charcoal palette.</desc>
+  <defs>
+    <linearGradient id="background" x1="30" y1="20" x2="1100" y2="420" gradientUnits="userSpaceOnUse"><stop stop-color="#241B12"/><stop offset="1" stop-color="#0D0A07"/></linearGradient>
+    <linearGradient id="amber" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F7C26B"/><stop offset="1" stop-color="#D9831F"/></linearGradient>
+    <linearGradient id="top" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6A5A48"/><stop offset="1" stop-color="#43372B"/></linearGradient>
+    <linearGradient id="left" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3A2F25"/><stop offset="1" stop-color="#201911"/></linearGradient>
+    <linearGradient id="right" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#54463A"/><stop offset="1" stop-color="#2E251C"/></linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3B2D1D"/><stop offset="1" stop-color="#1E1610"/></linearGradient>
+    <filter id="ambient" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="16"/></filter>
+    <filter id="cardShadow" x="-30%" y="-50%" width="170%" height="220%"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#050302" flood-opacity=".55"/></filter>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; }
+      .serif { font-family: Georgia, 'Times New Roman', serif; }
+      .mono { font-family: 'Courier New', monospace; }
+      .stack-float { animation: stack-float 6s ease-in-out infinite; }
+      .card-float { animation: card-float 6s ease-in-out infinite; }
+      .card-float-later { animation: card-float 6s ease-in-out -3s infinite; }
+      .card-float-last { animation: card-float 6s ease-in-out -1.5s infinite; }
+      .pulse { animation: pulse 3s ease-in-out infinite; }
+      .led { animation: led 1.6s ease-in-out infinite; }
+      .led2 { animation: led 1.6s ease-in-out -.5s infinite; }
+      .led3 { animation: led 1.6s ease-in-out -1s infinite; }
+      @keyframes stack-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+      @keyframes card-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+      @keyframes pulse { 0%,100% { opacity: .35; } 50% { opacity: .9; } }
+      @keyframes led { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+      @media (prefers-reduced-motion: reduce) { .stack-float, .card-float, .card-float-later, .card-float-last, .pulse, .led, .led2, .led3 { animation: none; } }
+    </style>
+  </defs>
+
+  <rect x="1" y="1" width="1118" height="418" rx="28" fill="url(#background)" stroke="#5B4528" stroke-width="2"/>
+  <path d="M58 93H1062" stroke="#3D2F1D"/>
+  <ellipse class="pulse" cx="840" cy="270" rx="190" ry="80" fill="#E29A2E" opacity=".3" filter="url(#ambient)"/>
+
+  <g opacity=".3" stroke="#B07A2E">
+    <path d="M620 335 820 250 1050 340M650 350 845 266 1075 356M685 365 875 282 1085 372M725 382 910 297 1085 388"/>
+    <path d="M662 318 855 398M702 301 895 381M742 284 935 364M782 267 975 347M822 250 1015 330"/>
+  </g>
+
+  <g transform="translate(58 34)">
+    <rect width="38" height="38" rx="11" fill="url(#amber)"/>
+    <g transform="translate(7 7)" stroke="#1C1814" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="m14.31 8 5.74 9.94M9.69 8h11.48m-13.79 4 5.74-9.94M9.69 16 3.95 6.06M14.31 16H2.83m13.79-4-5.74 9.94"/>
+    </g>
+    <text class="serif" x="52" y="26" fill="#F6EBD9" font-size="22" font-weight="700">StudioSpace API</text>
+  </g>
+  <text x="1062" y="58" text-anchor="end" fill="#A38A63" font-size="13" letter-spacing="2">EXPRESS · MONGODB · TYPESCRIPT</text>
+
+  <text class="serif" x="58" y="172" fill="#F6EBD9" font-size="44" font-weight="700">A booking engine</text>
+  <text class="serif" x="58" y="224" fill="#F5B84B" font-size="44" font-weight="700">you can trust.</text>
+  <text x="58" y="266" fill="#CDBA97" font-size="17">Secure studio listings, transactional bookings that never</text>
+  <text x="58" y="290" fill="#CDBA97" font-size="17">overlap, PDF receipts and reviews behind a clean REST API.</text>
+
+  <g font-size="13" font-weight="700" fill="#F6EBD9">
+    <rect x="58" y="318" width="84" height="30" rx="15" fill="#2F2418" stroke="#6B5130"/><text x="100" y="338" text-anchor="middle">Express 5</text>
+    <rect x="152" y="318" width="96" height="30" rx="15" fill="#2F2418" stroke="#6B5130"/><text x="200" y="338" text-anchor="middle">MongoDB</text>
+    <rect x="258" y="318" width="108" height="30" rx="15" fill="#2F2418" stroke="#6B5130"/><text x="312" y="338" text-anchor="middle">TypeScript</text>
+    <rect x="376" y="318" width="76" height="30" rx="15" fill="#2F2418" stroke="#6B5130"/><text x="414" y="338" text-anchor="middle">Zod</text>
+    <rect x="462" y="318" width="64" height="30" rx="15" fill="#2F2418" stroke="#6B5130"/><text x="494" y="338" text-anchor="middle">JWT</text>
+  </g>
+
+  <!-- stacked server units -->
+  <g class="stack-float">
+    <g>
+      <path d="M840 258 910 288 840 318 770 288Z" fill="url(#top)"/>
+      <path d="M770 288 840 318 840 346 770 316Z" fill="url(#left)"/>
+      <path d="M840 318 910 288 910 316 840 346Z" fill="url(#right)"/>
+      <circle class="led" cx="862" cy="323" r="3.2" fill="#F5B84B"/><circle class="led2" cx="874" cy="318" r="3.2" fill="#2F9E6B"/><circle class="led3" cx="886" cy="313" r="3.2" fill="#F5B84B"/>
+    </g>
+    <g transform="translate(0 -34)">
+      <path d="M840 258 910 288 840 318 770 288Z" fill="url(#top)"/>
+      <path d="M770 288 840 318 840 346 770 316Z" fill="url(#left)"/>
+      <path d="M840 318 910 288 910 316 840 346Z" fill="url(#right)"/>
+      <circle class="led2" cx="862" cy="323" r="3.2" fill="#2F9E6B"/><circle class="led3" cx="874" cy="318" r="3.2" fill="#F5B84B"/><circle class="led" cx="886" cy="313" r="3.2" fill="#2F9E6B"/>
+    </g>
+    <g transform="translate(0 -68)">
+      <path d="M840 258 910 288 840 318 770 288Z" fill="url(#top)"/>
+      <path d="M770 288 840 318 840 346 770 316Z" fill="url(#left)"/>
+      <path d="M840 318 910 288 910 316 840 346Z" fill="url(#amber)"/>
+      <circle class="led3" cx="862" cy="323" r="3.2" fill="#1C1814"/><circle class="led" cx="874" cy="318" r="3.2" fill="#1C1814"/><circle class="led2" cx="886" cy="313" r="3.2" fill="#1C1814"/>
+    </g>
+  </g>
+
+  <!-- floating response cards -->
+  <g class="card-float" filter="url(#cardShadow)">
+    <rect x="660" y="116" width="190" height="52" rx="14" fill="url(#card)" stroke="#6B5130"/>
+    <circle cx="684" cy="142" r="10" fill="#2F9E6B"/>
+    <path d="m679.5 142 3.2 3.2 6-6.4" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="mono" x="702" y="139" fill="#F6EBD9" font-size="12" font-weight="700">POST /bookings</text>
+    <text x="702" y="156" fill="#CDBA97" font-size="11.5">201 Created · Pending</text>
+  </g>
+  <g class="card-float-later" filter="url(#cardShadow)">
+    <rect x="905" y="150" width="175" height="52" rx="14" fill="url(#card)" stroke="#6B5130"/>
+    <circle cx="929" cy="176" r="10" fill="#C94F3D"/>
+    <path d="m925 172 8 8M933 172l-8 8" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+    <text class="mono" x="947" y="173" fill="#F6EBD9" font-size="12" font-weight="700">No cookie</text>
+    <text x="947" y="190" fill="#CDBA97" font-size="11.5">401 Unauthorized</text>
+  </g>
+  <g class="card-float-last" filter="url(#cardShadow)">
+    <rect x="915" y="318" width="165" height="52" rx="14" fill="url(#card)" stroke="#6B5130"/>
+    <circle cx="939" cy="344" r="10" fill="#D9831F"/>
+    <text x="935" y="349" fill="#fff" font-size="13" font-weight="700">!</text>
+    <text class="mono" x="957" y="341" fill="#F6EBD9" font-size="12" font-weight="700">Slot taken</text>
+    <text x="957" y="358" fill="#CDBA97" font-size="11.5">409 Conflict</text>
+  </g>
+</svg>
