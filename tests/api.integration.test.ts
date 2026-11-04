@@ -324,3 +324,32 @@ describe("image uploads", () => {
     expect(result.json.message).toMatch(/JPEG, PNG or WebP/);
   });
 });
+
+describe("dashboard summary", () => {
+  it("reports host revenue and guest spending from confirmed work only", async () => {
+    const owner = await tokenFor("dash-host", "Dana Dash");
+    const guest = await tokenFor("dash-guest", "Gus Dash");
+
+    const studio = await call("/studios", { method: "POST", token: owner, body: { ...studioInput, title: "Dashboard Fixture Studio" } });
+    const id = studio.json?.data.id;
+
+    const confirmedBooking = await call("/bookings", { method: "POST", token: guest, body: { studioId: id, ...slot("09:00", "11:00") } });
+    const pendingBooking = await call("/bookings", { method: "POST", token: guest, body: { studioId: id, ...slot("14:00", "15:00") } });
+    expect(pendingBooking.status).toBe(201);
+    await call(`/bookings/${confirmedBooking.json?.data.id}/status`, { method: "PATCH", token: owner, body: { status: "Confirmed" } });
+
+    const host = (await call("/dashboard/summary", { token: owner })).json?.data.host;
+    expect(host.listings).toBe(1);
+    expect(host.bookingsByStatus).toMatchObject({ Pending: 1, Confirmed: 1, Completed: 0, Cancelled: 0 });
+    expect(host.revenue).toBe(60 * 2);
+    expect(host.monthly).toHaveLength(1);
+
+    const guestView = (await call("/dashboard/summary", { token: guest })).json?.data.guest;
+    expect(guestView.bookingsByStatus).toMatchObject({ Pending: 1, Confirmed: 1 });
+    expect(guestView.totalSpent).toBe(60 * 2 + 100);
+  });
+
+  it("requires authentication", async () => {
+    expect((await call("/dashboard/summary")).status).toBe(401);
+  });
+});
