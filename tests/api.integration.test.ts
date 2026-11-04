@@ -273,3 +273,20 @@ describe("deleting a studio", () => {
     expect(open).toEqual([]);
   });
 });
+
+describe("newsletter", () => {
+  it("subscribes an address once and treats repeats as already subscribed", async () => {
+    const first = await call("/newsletter", { method: "POST", body: { email: "  Maker@Example.com " } });
+    expect(first.status).toBe(201);
+    expect(first.json?.data.alreadySubscribed).toBe(false);
+
+    const repeat = await call("/newsletter", { method: "POST", body: { email: "maker@example.com" } });
+    expect(repeat.status).toBe(200);
+    expect(repeat.json?.data.alreadySubscribed).toBe(true);
+  });
+
+  it("rejects malformed addresses", async () => {
+    expect((await call("/newsletter", { method: "POST", body: { email: "not-an-email" } })).status).toBe(400);
+    expect((await call("/newsletter", { method: "POST", body: {} })).status).toBe(400);
+  });
+});
