@@ -295,7 +295,7 @@ describe("newsletter", () => {
 describe("image uploads", () => {
   async function upload(bytes: Uint8Array, token?: string) {
     const form = new FormData();
-    form.append("image", new Blob([bytes], { type: "image/png" }), "photo.png");
+    form.append("image", new Blob([new Uint8Array(bytes)], { type: "image/png" }), "photo.png");
     const response = await fetch(`${base}/api/uploads`, {
       method: "POST",
       headers: { origin: ORIGIN, ...(token ? { cookie: `${COOKIE}=${token}` } : {}) },
