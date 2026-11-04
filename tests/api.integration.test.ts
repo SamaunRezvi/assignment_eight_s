@@ -85,6 +85,7 @@ beforeAll(async () => {
   process.env.CLIENT_ORIGIN = ORIGIN;
   process.env.JWT_SECRET = SECRET;
   process.env.AUTH_COOKIE_NAME = COOKIE;
+  process.env.IMGBB_API_KEY = "test-key-never-sent-anywhere";
 
   const db = await import("../src/config/db.js");
   const { createApp } = await import("../src/app.js");
@@ -288,5 +289,38 @@ describe("newsletter", () => {
   it("rejects malformed addresses", async () => {
     expect((await call("/newsletter", { method: "POST", body: { email: "not-an-email" } })).status).toBe(400);
     expect((await call("/newsletter", { method: "POST", body: {} })).status).toBe(400);
+  });
+});
+
+describe("image uploads", () => {
+  async function upload(bytes: Uint8Array, token?: string) {
+    const form = new FormData();
+    form.append("image", new Blob([bytes], { type: "image/png" }), "photo.png");
+    const response = await fetch(`${base}/api/uploads`, {
+      method: "POST",
+      headers: { origin: ORIGIN, ...(token ? { cookie: `${COOKIE}=${token}` } : {}) },
+      body: form,
+    });
+    return { status: response.status, json: (await response.json()) as Record<string, any> }; // eslint-disable-line @typescript-eslint/no-explicit-any
+  }
+
+  it("requires authentication", async () => {
+    expect((await upload(new Uint8Array(32))).status).toBe(401);
+  });
+
+  it("rejects a request without a file", async () => {
+    const response = await fetch(`${base}/api/uploads`, {
+      method: "POST",
+      headers: { origin: ORIGIN, cookie: `${COOKIE}=${guestA}` },
+      body: new FormData(),
+    });
+    expect(response.status).toBe(400);
+  });
+
+  it("rejects files whose bytes are not a real image, whatever the declared type", async () => {
+    const script = new TextEncoder().encode("<script>alert(1)</script> padded to pass the length check");
+    const result = await upload(script, guestA);
+    expect(result.status).toBe(400);
+    expect(result.json.message).toMatch(/JPEG, PNG or WebP/);
   });
 });
