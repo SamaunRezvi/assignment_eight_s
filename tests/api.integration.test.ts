@@ -353,3 +353,30 @@ describe("dashboard summary", () => {
     expect((await call("/dashboard/summary")).status).toBe(401);
   });
 });
+
+describe("listing query limits", () => {
+  it("rejects out-of-range pagination and unknown sort or category values", async () => {
+    expect((await call("/studios?limit=500")).status).toBe(400);
+    expect((await call("/studios?page=0")).status).toBe(400);
+    expect((await call("/studios?sort=cheapest-first")).status).toBe(400);
+    expect((await call("/studios?category=castle")).status).toBe(400);
+  });
+
+  it("answers malformed ids with a clean 400 instead of a server error", async () => {
+    expect((await call("/studios/not-an-object-id")).status).toBe(400);
+  });
+});
+
+describe("transport hardening", () => {
+  it("sends security headers and does not advertise the framework", async () => {
+    const response = await fetch(`${base}/api/health`);
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(response.headers.get("x-powered-by")).toBeNull();
+  });
+
+  it("returns a JSON 404 for unknown routes", async () => {
+    const missing = await call("/does-not-exist");
+    expect(missing.status).toBe(404);
+    expect(missing.type).toContain("application/json");
+  });
+});
