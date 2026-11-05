@@ -450,3 +450,32 @@ describe("studio price, capacity and sort", () => {
     expect(first.json?.meta).toMatchObject({ total: 3, page: 1, limit: 2, totalPages: 2 });
   });
 });
+
+describe("featured and owned studio lists", () => {
+  it("returns the requested number of featured studios, best rated first", async () => {
+    const result = await call("/studios/featured?limit=2");
+    expect(result.status).toBe(200);
+    const items = result.json?.data as Array<{ rating: number }>;
+    expect(items).toHaveLength(2);
+    expect(items[0]!.rating).toBeGreaterThanOrEqual(items[1]!.rating);
+    expect((await call("/studios/featured?limit=50")).status).toBe(400);
+  });
+
+  it("lists only the caller's own studios, with the owner email visible to them", async () => {
+    const mine = await call("/studios/mine", { token: await tokenFor("discovery-host", "Dora Discovery") });
+    expect(mine.status).toBe(200);
+    const items = mine.json?.data as Array<{ title: string; ownerEmail: string }>;
+    expect(items).toHaveLength(3);
+    expect(items.every((item) => item.ownerEmail === "discovery-host@example.com")).toBe(true);
+
+    const stranger = await call("/studios/mine", { token: await tokenFor("nobody", "No Body") });
+    expect(stranger.json?.data).toEqual([]);
+    expect((await call("/studios/mine")).status).toBe(401);
+  });
+
+  it("offers the distinct city list for filters", async () => {
+    const cities = (await call("/studios/cities")).json?.data as string[];
+    expect(cities).toContain("Filterton");
+    expect(new Set(cities).size).toBe(cities.length);
+  });
+});
