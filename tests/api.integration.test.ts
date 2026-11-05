@@ -380,3 +380,41 @@ describe("transport hardening", () => {
     expect(missing.type).toContain("application/json");
   });
 });
+
+async function createStudio(token: string, overrides: Record<string, unknown> = {}) {
+  const created = await call("/studios", { method: "POST", token, body: { ...studioInput, ...overrides } });
+  expect(created.status).toBe(201);
+  return created.json?.data.id as string;
+}
+
+describe("studio discovery filters", () => {
+  const city = "Filterton";
+  let discoveryHost: string;
+
+  beforeAll(async () => {
+    discoveryHost = await tokenFor("discovery-host", "Dora Discovery");
+    const location = (address: string) => ({ address, city });
+    await createStudio(discoveryHost, { title: "Filterton Budget Photo Room", category: "photo-studio", hourlyRate: 30, maxCapacity: 3, location: location("1 Budget Road") });
+    await createStudio(discoveryHost, { title: "Filterton Mid Music Suite", category: "music-suite", hourlyRate: 60, maxCapacity: 8, location: location("2 Middle Road") });
+    await createStudio(discoveryHost, { title: "Filterton Grand Photo Hall", category: "photo-studio", hourlyRate: 90, maxCapacity: 12, location: location("3 Grand Road") });
+  });
+
+  const titlesFor = async (query: string) => {
+    const result = await call(`/studios?city=${city}&${query}`);
+    expect(result.status).toBe(200);
+    return (result.json?.data as Array<{ title: string }>).map((item) => item.title);
+  };
+
+  it("matches the city exactly and ignores letter case", async () => {
+    expect(await titlesFor("")).toHaveLength(3);
+    const lower = await call("/studios?city=filterton");
+    expect(lower.json?.meta.total).toBe(3);
+    expect((await call("/studios?city=Filter")).json?.meta.total).toBe(0);
+  });
+
+  it("narrows results by category", async () => {
+    expect(await titlesFor("category=music-suite")).toEqual(["Filterton Mid Music Suite"]);
+    expect(await titlesFor("category=photo-studio")).toHaveLength(2);
+    expect(await titlesFor("category=workshop")).toEqual([]);
+  });
+});
