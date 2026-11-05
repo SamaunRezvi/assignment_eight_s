@@ -33,6 +33,11 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     return;
   }
 
+  if (typeof err === "object" && err !== null && "type" in err && err.type === "entity.too.large") {
+    res.status(413).json({ success: false, message: "The request body is too large" });
+    return;
+  }
+
   console.error("Unhandled error:", err);
   res.status(500).json({
     success: false,
