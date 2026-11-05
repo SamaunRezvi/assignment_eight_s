@@ -518,3 +518,46 @@ describe("booking request validation", () => {
     expect(created.json?.data).toMatchObject({ status: "Pending", subtotal: 150, total: 250 });
   });
 });
+
+describe("host booking lifecycle", () => {
+  it("walks a booking from Pending to Confirmed to Completed and then freezes it", async () => {
+    const owner = await tokenFor("lifecycle-host", "Lena Lifecycle");
+    const guest = await tokenFor("lifecycle-guest", "Leo Lifecycle");
+    const studio = await createStudio(owner, { title: "Lifecycle Fixture Studio" });
+    const created = await call("/bookings", { method: "POST", token: guest, body: { studioId: studio, ...slot("09:00", "11:00") } });
+    const id = created.json?.data.id as string;
+    const setStatus = (token: string, status: string) => call(`/bookings/${id}/status`, { method: "PATCH", token, body: { status } });
+
+    // A guest may only cancel; completing is the host's call once the session is confirmed.
+    expect((await setStatus(guest, "Completed")).status).toBe(409);
+    expect((await setStatus(owner, "Completed")).status).toBe(409);
+
+    expect((await setStatus(owner, "Confirmed")).json?.data.status).toBe("Confirmed");
+    expect((await setStatus(guest, "Cancelled")).status).toBe(409);
+    expect((await setStatus(owner, "Completed")).json?.data.status).toBe("Completed");
+
+    expect((await setStatus(owner, "Cancelled")).status).toBe(409);
+    expect((await setStatus(owner, "Confirmed")).status).toBe(409);
+  });
+
+  it("lets the host decline a pending request and shows it to both sides", async () => {
+    const owner = await tokenFor("decline-host", "Dev Decline");
+    const guest = await tokenFor("decline-guest", "Dee Decline");
+    const studio = await createStudio(owner, { title: "Decline Fixture Studio" });
+    const created = await call("/bookings", { method: "POST", token: guest, body: { studioId: studio, ...slot("14:00", "16:00") } });
+    const id = created.json?.data.id as string;
+
+    const hosted = await call("/bookings/hosted", { token: owner });
+    expect((hosted.json?.data as Array<{ id: string }>).some((item) => item.id === id)).toBe(true);
+
+    expect((await call(`/bookings/${id}/status`, { method: "PATCH", token: owner, body: { status: "Cancelled" } })).json?.data.status).toBe("Cancelled");
+    const mine = await call("/bookings/mine", { token: guest });
+    expect((mine.json?.data as Array<{ id: string; status: string }>).find((item) => item.id === id)?.status).toBe("Cancelled");
+  });
+
+  it("rejects status values outside the allowed set", async () => {
+    const guest = await tokenFor("decline-guest", "Dee Decline");
+    expect((await call("/bookings/64b000000000000000000001/status", { method: "PATCH", token: guest, body: { status: "Pending" } })).status).toBe(400);
+    expect((await call("/bookings/64b000000000000000000001/status", { method: "PATCH", token: guest, body: { status: "Teleported" } })).status).toBe(400);
+  });
+});
