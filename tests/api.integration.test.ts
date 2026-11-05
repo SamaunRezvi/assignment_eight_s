@@ -603,3 +603,24 @@ describe("review rules", () => {
     expect((await call(`/studios/${reviewStudio}`)).json?.data).toMatchObject({ rating: 5, reviewCount: 1 });
   });
 });
+
+describe("wishlist access", () => {
+  it("requires authentication on every wishlist route", async () => {
+    expect((await call("/wishlist")).status).toBe(401);
+    expect((await call("/wishlist/ids")).status).toBe(401);
+    expect((await call("/wishlist/64b000000000000000000001", { method: "PUT" })).status).toBe(401);
+    expect((await call("/wishlist/64b000000000000000000001", { method: "DELETE" })).status).toBe(401);
+  });
+
+  it("refuses to save a studio that does not exist and keeps lists private per user", async () => {
+    const saver = await tokenFor("saver-1", "Sam Saver");
+    const other = await tokenFor("saver-2", "Sia Saver");
+    expect((await call("/wishlist/64b000000000000000000007", { method: "PUT", token: saver })).status).toBe(404);
+
+    const studio = await createStudio(await tokenFor("saver-host", "Sol Host"), { title: "Wishlist Fixture Studio" });
+    expect((await call(`/wishlist/${studio}`, { method: "PUT", token: saver })).status).toBeLessThan(300);
+
+    expect((await call("/wishlist/ids", { token: saver })).json?.data).toContain(studio);
+    expect((await call("/wishlist/ids", { token: other })).json?.data).not.toContain(studio);
+  });
+});
