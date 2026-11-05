@@ -418,3 +418,35 @@ describe("studio discovery filters", () => {
     expect(await titlesFor("category=workshop")).toEqual([]);
   });
 });
+
+describe("studio price, capacity and sort", () => {
+  const titles = async (query: string) => {
+    const result = await call(`/studios?city=Filterton&${query}`);
+    expect(result.status).toBe(200);
+    return (result.json?.data as Array<{ title: string }>).map((item) => item.title);
+  };
+
+  it("keeps listings inside an inclusive price range", async () => {
+    expect(await titles("minPrice=60&maxPrice=90")).toHaveLength(2);
+    expect(await titles("maxPrice=29")).toEqual([]);
+    expect(await titles("minPrice=91")).toEqual([]);
+  });
+
+  it("requires enough capacity for the whole group", async () => {
+    expect(await titles("capacity=10")).toEqual(["Filterton Grand Photo Hall"]);
+    expect(await titles("capacity=3")).toHaveLength(3);
+  });
+
+  it("sorts by price in both directions", async () => {
+    expect(await titles("sort=price-asc")).toEqual(["Filterton Budget Photo Room", "Filterton Mid Music Suite", "Filterton Grand Photo Hall"]);
+    expect(await titles("sort=price-desc")).toEqual(["Filterton Grand Photo Hall", "Filterton Mid Music Suite", "Filterton Budget Photo Room"]);
+  });
+
+  it("paginates and reports the total", async () => {
+    const first = await call("/studios?city=Filterton&sort=price-asc&limit=2&page=1");
+    const second = await call("/studios?city=Filterton&sort=price-asc&limit=2&page=2");
+    expect(first.json?.data).toHaveLength(2);
+    expect(second.json?.data).toHaveLength(1);
+    expect(first.json?.meta).toMatchObject({ total: 3, page: 1, limit: 2, totalPages: 2 });
+  });
+});
