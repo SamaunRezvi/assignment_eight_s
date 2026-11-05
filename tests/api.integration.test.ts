@@ -479,3 +479,42 @@ describe("featured and owned studio lists", () => {
     expect(new Set(cities).size).toBe(cities.length);
   });
 });
+
+describe("booking request validation", () => {
+  let target: string;
+  let validationHost: string;
+  let validationGuest: string;
+
+  beforeAll(async () => {
+    validationHost = await tokenFor("validation-host", "Vera Validate");
+    validationGuest = await tokenFor("validation-guest", "Vic Validate");
+    target = await createStudio(validationHost, { title: "Validation Fixture Studio", maxCapacity: 4 });
+  });
+
+  const book = (body: object) => call("/bookings", { method: "POST", token: validationGuest, body: { studioId: target, guests: 2, note: "", ...body } });
+
+  it("rejects sessions that are too short, too long or end before they start", async () => {
+    expect((await book({ date: day, startTime: "10:00", endTime: "10:30" })).status).toBe(400);
+    expect((await book({ date: day, startTime: "06:00", endTime: "20:00" })).status).toBe(400);
+    expect((await book({ date: day, startTime: "12:00", endTime: "10:00" })).status).toBe(400);
+  });
+
+  it("rejects dates in the past and malformed dates or times", async () => {
+    const past = new Date(Date.now() - 5 * 86_400_000).toISOString().slice(0, 10);
+    expect((await book({ date: past, startTime: "10:00", endTime: "12:00" })).json?.message).toMatch(/past/i);
+    expect((await book({ date: "2026-02-31", startTime: "10:00", endTime: "12:00" })).status).toBe(400);
+    expect((await book({ date: day, startTime: "10:15", endTime: "12:00" })).status).toBe(400);
+  });
+
+  it("rejects unknown studios and notes that are too long", async () => {
+    const missing = await call("/bookings", { method: "POST", token: validationGuest, body: { studioId: "64b000000000000000000009", date: day, startTime: "10:00", endTime: "12:00", guests: 1 } });
+    expect(missing.status).toBe(404);
+    expect((await book({ date: day, startTime: "10:00", endTime: "12:00", note: "x".repeat(501) })).status).toBe(400);
+  });
+
+  it("prices a booking from the hourly rate plus the refundable deposit", async () => {
+    const created = await book({ date: day, startTime: "09:00", endTime: "11:30" });
+    expect(created.status).toBe(201);
+    expect(created.json?.data).toMatchObject({ status: "Pending", subtotal: 150, total: 250 });
+  });
+});
