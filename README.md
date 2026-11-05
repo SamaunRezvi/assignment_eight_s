@@ -139,6 +139,21 @@ Base path: `/api`. 🔒 means a valid authentication cookie is required.
 | POST | `/uploads` | 🔒 | Upload an image (multipart field `image`) |
 | POST | `/newsletter` | Public | Subscribe an email address |
 
+### Response format
+
+Every endpoint answers with the same envelope, so clients can handle results and failures in one place.
+
+```json
+{ "success": true, "data": { "id": "..." } }
+```
+
+Lists add paging details, and errors carry a readable message (plus per-field details for validation failures):
+
+```json
+{ "success": true, "data": [], "meta": { "total": 0, "page": 1, "limit": 12, "totalPages": 1 } }
+{ "success": false, "message": "This time slot is already booked" }
+```
+
 ### Status codes you will see
 
 | Code | Meaning |
