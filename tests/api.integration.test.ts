@@ -561,3 +561,45 @@ describe("host booking lifecycle", () => {
     expect((await call("/bookings/64b000000000000000000001/status", { method: "PATCH", token: guest, body: { status: "Teleported" } })).status).toBe(400);
   });
 });
+
+describe("review rules", () => {
+  let reviewStudio: string;
+  let reviewOwner: string;
+  let reviewer: string;
+
+  beforeAll(async () => {
+    reviewOwner = await tokenFor("review-owner", "Rae Owner");
+    reviewer = await tokenFor("reviewer-1", "Rex Reviewer");
+    reviewStudio = await createStudio(reviewOwner, { title: "Review Fixture Studio" });
+  });
+
+  const post = (token: string | undefined, body: object, studio = reviewStudio) => call(`/studios/${studio}/reviews`, { method: "POST", token, body });
+
+  it("requires a login and a rating from 1 to 5 with a real comment", async () => {
+    expect((await post(undefined, { rating: 5, comment: "Great place to record." })).status).toBe(401);
+    expect((await post(reviewer, { rating: 0, comment: "Great place to record." })).status).toBe(400);
+    expect((await post(reviewer, { rating: 6, comment: "Great place to record." })).status).toBe(400);
+    expect((await post(reviewer, { rating: 4.5, comment: "Great place to record." })).status).toBe(400);
+    expect((await post(reviewer, { rating: 5, comment: "short" })).status).toBe(400);
+  });
+
+  it("stops hosts reviewing their own studio and reviews of missing studios", async () => {
+    expect((await post(reviewOwner, { rating: 5, comment: "My own place is the best." })).status).toBe(403);
+    expect((await post(reviewer, { rating: 5, comment: "Great place to record." }, "64b000000000000000000008")).status).toBe(404);
+  });
+
+  it("averages ratings across reviewers and lets only the author delete", async () => {
+    const first = await post(reviewer, { rating: 5, comment: "Spotless and well equipped." });
+    const second = await post(await tokenFor("reviewer-2", "Ria Reviewer"), { rating: 2, comment: "Noisy during the afternoon." });
+    expect(first.status).toBe(201);
+    expect(second.status).toBe(201);
+
+    const studio = await call(`/studios/${reviewStudio}`);
+    expect(studio.json?.data).toMatchObject({ rating: 3.5, reviewCount: 2 });
+
+    const reviewId = second.json?.data.id as string;
+    expect((await call(`/reviews/${reviewId}`, { method: "DELETE", token: reviewer })).status).toBe(404);
+    expect((await call(`/reviews/${reviewId}`, { method: "DELETE", token: await tokenFor("reviewer-2", "Ria Reviewer") })).status).toBe(200);
+    expect((await call(`/studios/${reviewStudio}`)).json?.data).toMatchObject({ rating: 5, reviewCount: 1 });
+  });
+});
