@@ -624,3 +624,20 @@ describe("wishlist access", () => {
     expect((await call("/wishlist/ids", { token: other })).json?.data).not.toContain(studio);
   });
 });
+
+describe("request size limits", () => {
+  it("answers an oversized JSON body with 413 instead of a server error", async () => {
+    const huge = await call("/studios", { method: "POST", token: await tokenFor("size-probe", "Sid Probe"), body: { title: "x".repeat(200_000) } });
+    expect(huge.status).toBe(413);
+    expect(huge.json?.message).toMatch(/too large/i);
+  });
+
+  it("answers malformed JSON with 400", async () => {
+    const response = await fetch(`${base}/api/studios`, {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: ORIGIN, cookie: `${COOKIE}=${await tokenFor("size-probe", "Sid Probe")}` },
+      body: "{not json",
+    });
+    expect(response.status).toBe(400);
+  });
+});
